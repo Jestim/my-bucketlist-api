@@ -17,6 +17,11 @@
   },
   "plugins": ["@typescript-eslint", "prettier"],
   "rules": {
-    "prettier/prettier": 2
+    "prettier/prettier": 2,
+    "no-console": "off",
+    "import/no-unresolved": "off",
+    "import/extensions": "off",
+    "indent": ["error", 2]
+    // "@typescript-eslint/no-var-requires": "off"
   }
 }
