@@ -9,11 +9,10 @@ const connect = () => {
   }
 
   // Set up DB connection
-  mongoose.connect(mongoDbUri, () => {
-    console.log('Connected to database');
-  });
+  mongoose.connect(mongoDbUri);
   const db = mongoose.connection;
   db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+  db.on('open', () => console.log('Connected to database'));
 };
 
 export default connect;
