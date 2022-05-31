@@ -21,7 +21,8 @@
     "no-console": "off",
     "import/no-unresolved": "off",
     "import/extensions": "off",
-    "indent": ["error", 2]
+    "indent": ["error", 2],
+    "consistent-return": "off"
     // "@typescript-eslint/no-var-requires": "off"
   }
 }
