@@ -1,16 +1,12 @@
 import { Router } from 'express';
-import passport from 'passport';
-import {
-  signUpController,
-  logInController
-} from '../controllers/authController';
+import authController from '../controllers/authController';
 
 const router = Router();
 
 // SIGN UP NEW USER
-router.post('/signup', signUpController);
+router.post('/signup', authController.signUp);
 
 // AUTHENTICATE USER
-router.post('/login', logInController);
+router.post('/login', authController.logIn);
 
 export default router;

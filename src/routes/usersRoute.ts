@@ -1,50 +1,30 @@
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
+import userController from '../controllers/userController';
 
 const router = Router();
 
 // GET ALL USERS
-router.get('/', (req: Request, res: Response) => {
-  res.json('Resturns all users');
-});
-
-// CREATE NEW USER
-router.post('/', (req: Request, res: Response) => {
-  res.json('Creates a new user');
-});
-
-// UPDATE USER
-router.put('/', (req: Request, res: Response) => {
-  res.json('Updates a user');
-});
-
-// DELETE USER
-router.delete('/', (req: Request, res: Response) => {
-  res.json('Deletes a user');
-});
+router.get('/', userController.UsersListGet);
 
 // GET A USERS GOALS
-router.get('/:userid/goals', (req: Request, res: Response) => {
-  res.json('Returns a users goals');
-});
+router.get('/:userid/goals', userController.userGoalsGet);
 
 // GET A USERS GOAL FEED
-router.get('/:userid/goalsfeed', (req: Request, res: Response) => {
-  res.json('Returns a users goalsfeed');
-});
+router.get('/:userid/goalsfeed', userController.userGoalFeedGet);
 
 // GET A USERS SPECIFIC GOAL
-router.get('/:userid/goals/:goalid', (req: Request, res: Response) => {
-  res.json('Returns a users specific goal');
-});
+router.get('/:userid/goals/:goalid', userController.userGoalGet);
 
 // FIND USER(S)
-router.get('/find', (req: Request, res: Response) => {
-  res.json('Searches for users');
-});
+router.get('/find', userController.findUsersGet);
 
 // GET SPECIFIC USER
-router.get('/:userid', (req: Request, res: Response) => {
-  res.json('Returns a specific user');
-});
+router.get('/:userid', userController.findUserGet);
+
+// UPDATE USER
+router.put('/:userid', userController.updateUserPut);
+
+// DELETE USER
+router.delete('/:userid', userController.deleteUserDelete);
 
 export default router;

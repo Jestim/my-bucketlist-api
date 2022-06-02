@@ -6,20 +6,36 @@ import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import User, { IUser } from '../models/User';
 
-export const signUpController = [
+const signUp = [
   body('username')
     .trim()
     .toLowerCase()
     .isLength({ min: 1 })
     .withMessage('Username must nor be empty')
-    .escape(),
+    .bail()
+    .escape()
+    .custom((value) =>
+      User.find({ username: value }).then((user) => {
+        if (user) {
+          return Promise.reject(new Error('Username is already in use'));
+        }
+      })
+    ),
 
   body('email')
     .trim()
     .toLowerCase()
     .isEmail()
     .withMessage('You must use a valid email')
-    .escape(),
+    .bail()
+    .escape()
+    .custom((value) =>
+      User.find({ email: value }).then((user) => {
+        if (user) {
+          return Promise.reject(new Error('Email is already in use'));
+        }
+      })
+    ),
 
   body('password').trim().isLength({ min: 1 }).escape(),
 
@@ -66,23 +82,39 @@ export const signUpController = [
           next(error);
         }
 
-        res.json(theUser);
+        res.json({
+          message: 'User created',
+          user: {
+            username: theUser.username,
+            email: theUser.email,
+            firstName: theUser.firstName,
+            lastName: theUser.lastName,
+            age: theUser.age
+          }
+        });
       });
     });
   }
 ];
 
-export const logInController = [
-  passport.authenticate('local', { session: false }),
-
+const logIn = [
   body('username')
     .trim()
     .toLowerCase()
     .isLength({ min: 1 })
-    .withMessage('Username must nor be empty')
-    .escape(),
+    .withMessage('Username must not be empty')
+    .escape()
+    .custom((value) =>
+      User.find({ username: value }).then((user) => {
+        if (!user) {
+          return Promise.reject(new Error('Username does not exist'));
+        }
+      })
+    ),
 
   body('password').trim().isLength({ min: 1 }).escape(),
+
+  passport.authenticate('local', { session: false }),
 
   (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
@@ -96,8 +128,9 @@ export const logInController = [
         return next(err);
       }
       const payload = {
-        id: user.id,
-        expire: Date.now() + 1000 * 60 * 60 * 24 * 7
+        sub: user.id,
+        iat: Date.now(),
+        exp: Date.now() + 1000 * 60 * 60 * 24 * 7
       };
 
       const jwtSecret = process.env.JWT_SECRET;
@@ -108,3 +141,8 @@ export const logInController = [
     });
   }
 ];
+
+export default {
+  signUp,
+  logIn
+};

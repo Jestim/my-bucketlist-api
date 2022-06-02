@@ -25,6 +25,7 @@ app.get('/', (req: Request, res: Response) => {
   res.json('Hi there! Got to /api for access to the data');
 });
 
+// JWT PROTECTED TEST ROUTE
 app.get(
   '/protected',
   passport.authenticate('jwt', { session: false }),

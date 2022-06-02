@@ -11,7 +11,7 @@ const jwtAuth = (passport: PassportStatic) => {
         secretOrKey: process.env.JWT_SECRET
       },
       (jwtPayload, done) => {
-        User.findById(jwtPayload.id, (err: Error, user: IUser) => {
+        User.findById(jwtPayload.sub, (err: Error, user: IUser) => {
           if (err) {
             return done(err, false);
           }
