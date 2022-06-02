@@ -70,8 +70,27 @@ const updateUserPut = [
 ];
 
 // DELETE USER
-const deleteUserDelete = (req: Request, res: Response) => {
-  res.json('Deletes a user');
+const deleteUserDelete = (req: Request, res: Response, next: NextFunction) => {
+  User.findByIdAndDelete(req.params.userid).exec((err, deletedUser) => {
+    if (err) {
+      return next(err);
+    }
+
+    if (!deletedUser) {
+      res.json(new Error('Could not find user'));
+    } else {
+      res.json({
+        message: 'User deleted',
+        user: {
+          username: deletedUser.username,
+          email: deletedUser.email,
+          firstName: deletedUser.firstName,
+          lastName: deletedUser.lastName,
+          age: deletedUser.age
+        }
+      });
+    }
+  });
 };
 
 // GET A USERS GOALS
