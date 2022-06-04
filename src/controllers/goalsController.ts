@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { body, validationResult } from 'express-validator';
+import { body, param, validationResult } from 'express-validator';
 import Goal from '../models/Goal';
 
 const createGoalPost = [
@@ -68,17 +68,17 @@ const updateGoalPost = [
     if (req.user) {
       Goal.findOneAndUpdate({ id: goalId, creator: req.user.id }, updatedInfo, {
         returnDocument: 'after'
-      }).exec((err, goal) => {
+      }).exec((err, theGoal) => {
         if (err) {
           return next(err);
         }
 
-        if (!goal) {
+        if (!theGoal) {
           res
             .status(403)
             .json({ message: 'You are not the creator of this goal' });
         } else {
-          res.status(200).json({ message: 'Goal update', goal });
+          res.status(200).json({ message: 'Goal update', theGoal });
         }
       });
     } else {
@@ -87,21 +87,30 @@ const updateGoalPost = [
   }
 ];
 
-const deleteGoalPost = [
-  body('title')
-    .trim()
-    .isLength({ min: 1 })
-    .withMessage('title name must nor be empty')
-    .escape(),
+const deleteGoalPost = (req: Request, res: Response, next: NextFunction) => {
+  param('goalid').escape();
 
-  body('description').trim().escape(),
+  const goalId = req.params.goalid;
+  if (req.user) {
+    Goal.findOneAndDelete({ id: goalId, creator: req.user.id }).exec(
+      (err, theGoal) => {
+        if (err) {
+          return next(err);
+        }
 
-  body('location').trim().escape(),
-
-  (req: Request, res: Response, next: NextFunction) => {
-    res.json('Delete a goal');
+        if (!theGoal) {
+          res
+            .status(403)
+            .json({ message: 'You are not the creator of this goal' });
+        } else {
+          res.json({ message: 'Goal deleted', theGoal });
+        }
+      }
+    );
+  } else {
+    res.status(401).json({ message: 'User is not logged in' });
   }
-];
+};
 
 export default {
   createGoalPost,
