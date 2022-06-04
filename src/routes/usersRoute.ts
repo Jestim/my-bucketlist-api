@@ -15,12 +15,6 @@ router.get('/:userid/goalsfeed', userController.userGoalFeedGet);
 // GET A USERS SPECIFIC GOAL
 router.get('/:userid/goals/:goalid', userController.userGoalGet);
 
-// FIND USER(S)
-router.get('/find', userController.findUsersGet);
-
-// GET SPECIFIC USER
-router.get('/:userid', userController.findUserGet);
-
 // UPDATE USER
 router.put('/:userid', userController.updateUserPut);
 

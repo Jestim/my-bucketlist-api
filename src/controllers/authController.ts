@@ -15,7 +15,7 @@ const signUp = [
     .bail()
     .escape()
     .custom((value) =>
-      User.find({ username: value }).then((user) => {
+      User.findOne({ username: value }).then((user) => {
         if (user) {
           return Promise.reject(new Error('Username is already in use'));
         }
@@ -30,7 +30,7 @@ const signUp = [
     .bail()
     .escape()
     .custom((value) =>
-      User.find({ email: value }).then((user) => {
+      User.findOne({ email: value }).then((user) => {
         if (user) {
           return Promise.reject(new Error('Email is already in use'));
         }
@@ -54,7 +54,6 @@ const signUp = [
   body('age').trim().isNumeric().escape(),
 
   async (req: Request, res: Response, next: NextFunction) => {
-    console.log(req.body);
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {

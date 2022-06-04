@@ -7,6 +7,7 @@ interface IGoal {
   sharedWith: Types.ObjectId[];
   isPrivate: boolean;
   isCrossedOff: boolean;
+  crossedOffAt: Date;
   creator: Types.ObjectId;
 }
 
@@ -18,6 +19,7 @@ const goalSchema = new Schema<IGoal>(
     sharedWith: { type: [Schema.Types.ObjectId], ref: 'User' },
     isPrivate: { type: Boolean, required: true, default: false },
     isCrossedOff: { type: Boolean, required: true, default: false },
+    crossedOffAt: { type: Date },
     creator: { type: Schema.Types.ObjectId, required: true, ref: 'User' }
   },
   { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } }

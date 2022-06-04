@@ -1,20 +1,15 @@
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
+import goalsController from '../controllers/goalsController';
 
 const router = Router();
 
 // CREATE A NEW GOAL
-router.post('/', (req: Request, res: Response) => {
-  res.json('Creates a new goal');
-});
+router.post('/', goalsController.createGoalPost);
 
 // UPDATE GOAL
-router.put('/:goalid', (req: Request, res: Response) => {
-  res.json('Updates a goal');
-});
+router.put('/:goalid', goalsController.updateGoalPost);
 
 // DELETE GOAL
-router.delete('/:goalid', (req: Request, res: Response) => {
-  res.json('Deletes a goal');
-});
+router.delete('/:goalid', goalsController.deleteGoalPost);
 
 export default router;
