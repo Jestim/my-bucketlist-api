@@ -110,6 +110,7 @@ describe('authentication route', () => {
         }
       });
     });
+
     describe('given invalid username', () => {
       it('should return status 401', async () => {
         const res = await req
@@ -120,6 +121,7 @@ describe('authentication route', () => {
         expect(res.status).toBe(401);
       });
     });
+
     describe('given invalid username', () => {
       it('should return status 401', async () => {
         const res = await req

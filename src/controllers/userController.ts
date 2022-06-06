@@ -4,15 +4,13 @@ import User from '../models/User';
 
 // GET ALL USERS
 const UsersListGet = (req: Request, res: Response, next: NextFunction) => {
-  User.find({}, { email: 0, password: 0, updatedAt: 0, __v: 0 }).exec(
-    (err, users) => {
-      if (err) {
-        return next(err);
-      }
-
-      res.json(users);
+  User.find({}, { password: 0, updatedAt: 0, __v: 0 }).exec((err, users) => {
+    if (err) {
+      return next(err);
     }
-  );
+
+    res.json(users);
+  });
 };
 
 // UPDATE USER

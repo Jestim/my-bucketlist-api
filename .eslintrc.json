@@ -23,7 +23,10 @@
     "import/extensions": "off",
     "indent": ["error", 2],
     "consistent-return": "off",
-    "import/no-extraneous-dependencies": "off"
+    "import/no-extraneous-dependencies": "off",
+    "no-plusplus": "off",
+    "@typescript-eslint/ban-ts-comment": "off",
+    "no-underscore-dangle": "off"
     // "@typescript-eslint/no-var-requires": "off"
   }
 }
