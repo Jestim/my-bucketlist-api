@@ -1,4 +1,5 @@
 import request from 'supertest';
+import jwt from 'jsonwebtoken';
 import app from '../../app';
 import db from '../../config/mockDb';
 import User from '../../models/User';
@@ -20,6 +21,21 @@ const userInput = {
   firstName: 'test',
   lastName: 'testson',
   age: 20
+};
+
+const loginInfo = {
+  username: 'test',
+  password: 'abc'
+};
+
+const loginInfoWrongUsername = {
+  username: 'tes',
+  password: 'abc'
+};
+
+const loginInfoWrongPw = {
+  username: 'test',
+  password: 'abcd'
 };
 
 describe('authentication route', () => {
@@ -65,10 +81,53 @@ describe('authentication route', () => {
           .type('form')
           .send(userInput);
 
-        console.log(res.body.errors);
         expect(res.status).toBe(400);
         expect(res.body.errors[0].msg).toBe('Username is already in use');
         expect(res.body.errors[1].msg).toBe('Email is already in use');
+      });
+    });
+  });
+
+  describe('login route', () => {
+    describe('given valid username and password', () => {
+      it('should return status 200 and a jwt with userid in payload', async () => {
+        const res = await req
+          .post('/api/auth/login')
+          .type('form')
+          .send(loginInfo);
+
+        expect(res.status).toBe(200);
+        expect(res.body.token).toBeTruthy();
+
+        if (res.body.token) {
+          const payload = jwt.decode(res.body.token);
+          expect(payload).toBeTruthy();
+
+          if (payload) {
+            const user = await User.findById(payload.sub);
+            expect(user).toBeTruthy();
+          }
+        }
+      });
+    });
+    describe('given invalid username', () => {
+      it('should return status 401', async () => {
+        const res = await req
+          .post('/api/auth/login')
+          .type('form')
+          .send(loginInfoWrongUsername);
+
+        expect(res.status).toBe(401);
+      });
+    });
+    describe('given invalid username', () => {
+      it('should return status 401', async () => {
+        const res = await req
+          .post('/api/auth/login')
+          .type('form')
+          .send(loginInfoWrongPw);
+
+        expect(res.status).toBe(401);
       });
     });
   });
