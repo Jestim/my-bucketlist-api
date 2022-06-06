@@ -11,7 +11,7 @@ const signUp = [
     .trim()
     .toLowerCase()
     .isLength({ min: 1 })
-    .withMessage('Username must nor be empty')
+    .withMessage('Username must not be empty')
     .bail()
     .escape()
     .custom((value) =>
@@ -42,13 +42,13 @@ const signUp = [
   body('firstName')
     .trim()
     .isLength({ min: 1 })
-    .withMessage('First name must nor be empty')
+    .withMessage('First name must not be empty')
     .escape(),
 
   body('lastName')
     .trim()
     .isLength({ min: 1 })
-    .withMessage('Last name must nor be empty')
+    .withMessage('Last name must not be empty')
     .escape(),
 
   body('age').trim().isNumeric().escape(),

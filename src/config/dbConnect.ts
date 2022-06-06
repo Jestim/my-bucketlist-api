@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const connect = () => {
+const dbConnect = () => {
   let mongoDbUri: string;
   if (process.env.MONGODB_URI) {
     mongoDbUri = process.env.MONGODB_URI;
@@ -15,4 +15,4 @@ const connect = () => {
   db.on('open', () => console.log('Connected to database'));
 };
 
-export default connect;
+export default dbConnect;

@@ -1,14 +1,9 @@
 import express, { Express, Request, Response } from 'express';
 import 'dotenv/config';
 import passport from 'passport';
-import connect from './config/connect';
 import apiRouter from './routes/apiRouter';
 import passportConfig from './config/passport';
 import jwtAuth from './middleware/jwtAuth';
-
-const port = process.env.PORT;
-
-connect();
 
 const app: Express = express();
 
@@ -21,7 +16,6 @@ jwtAuth(passport);
 app.use('/api', apiRouter);
 
 app.get('/', (req: Request, res: Response) => {
-  console.log('GET request recieved');
   res.json('Hi there! Got to /api for access to the data');
 });
 
@@ -34,6 +28,4 @@ app.get(
   }
 );
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+export default app;

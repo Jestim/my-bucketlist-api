@@ -22,7 +22,8 @@
     "import/no-unresolved": "off",
     "import/extensions": "off",
     "indent": ["error", 2],
-    "consistent-return": "off"
+    "consistent-return": "off",
+    "import/no-extraneous-dependencies": "off"
     // "@typescript-eslint/no-var-requires": "off"
   }
 }
