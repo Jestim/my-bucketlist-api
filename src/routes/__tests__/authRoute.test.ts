@@ -3,6 +3,12 @@ import jwt from 'jsonwebtoken';
 import app from '../../app';
 import db from '../../config/mockDb';
 import User from '../../models/User';
+import {
+  userInput,
+  loginInfo,
+  loginInfoWrongUsername,
+  loginInfoWrongPw
+} from '../../helpers/testHelpers/authRouteHelpers';
 
 beforeAll(async () => {
   await db.connect();
@@ -14,32 +20,8 @@ afterAll(async () => {
 
 const req = request(app);
 
-const userInput = {
-  username: 'test',
-  email: 'test@test.com',
-  password: 'abc',
-  firstName: 'test',
-  lastName: 'testson',
-  age: 20
-};
-
-const loginInfo = {
-  username: 'test',
-  password: 'abc'
-};
-
-const loginInfoWrongUsername = {
-  username: 'tes',
-  password: 'abc'
-};
-
-const loginInfoWrongPw = {
-  username: 'test',
-  password: 'abcd'
-};
-
 describe('authentication route', () => {
-  describe('signup route', () => {
+  describe('/api/auth/signup POST', () => {
     describe('given valid registration info', () => {
       it('should return status 200 and user info with message "User created"', async () => {
         const res = await req
@@ -88,7 +70,7 @@ describe('authentication route', () => {
     });
   });
 
-  describe('login route', () => {
+  describe('/api/auth/login POST', () => {
     describe('given valid username and password', () => {
       it('should return status 200 and a jwt with userid in payload', async () => {
         const res = await req
@@ -122,7 +104,7 @@ describe('authentication route', () => {
       });
     });
 
-    describe('given invalid username', () => {
+    describe('given invalid password', () => {
       it('should return status 401', async () => {
         const res = await req
           .post('/api/auth/login')

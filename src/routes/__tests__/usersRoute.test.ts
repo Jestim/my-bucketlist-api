@@ -7,13 +7,21 @@ import populateDbUsers from '../../helpers/testHelpers/populateDbUsers';
 import logInUser from '../../helpers/testHelpers/logInUser';
 
 const req = request(app);
-let jwtToken = '';
+let jwtToken: string;
+let payloadSub: string;
 
 beforeAll(async () => {
   await db.connect();
+
   await populateDbUsers(req);
+
   const response = await logInUser(req);
   jwtToken = response.body.token;
+
+  const payload = jwt.decode(jwtToken, {});
+  if (payload && typeof payload.sub === 'string') {
+    payloadSub = payload.sub;
+  }
 });
 
 afterAll(async () => {
@@ -23,29 +31,30 @@ afterAll(async () => {
 
 describe('users route', () => {
   describe('given authorized', () => {
-    it('should return status 200 and an array of all users', async () => {
-      const res = await await req
-        .get('/api/users')
-        .set('Authorization', `Bearer ${jwtToken}`);
+    describe('/api/users GET', () => {
+      it('should return status 200 and an array of all users', async () => {
+        const res = await req
+          .get('/api/users')
+          .set('Authorization', `Bearer ${jwtToken}`);
 
-      const usersFromDb: IUser[] = await User.find({});
+        const usersFromDb: IUser[] = await User.find({});
 
-      expect(res.status).toBe(200);
-      expect(res.body.length).toBe(usersFromDb.length);
-      expect(res.body[0]._id).toBe(usersFromDb[0].id);
+        expect(res.status).toBe(200);
+        expect(res.body).toBeInstanceOf(Array);
+        expect(res.body.length).toBe(usersFromDb.length);
+        expect(res.body[0]._id).toBe(usersFromDb[0].id);
+      });
     });
 
-    it('should return status 200 and the updated user', async () => {
-      const payload = jwt.decode(jwtToken);
+    describe('/api/users/:userid PUT', () => {
+      it('should return status 200 and the updated user', async () => {
+        const updatedInfo = {
+          firstName: 'John',
+          lastName: 'Doe',
+          age: 100
+        };
 
-      const updatedInfo = {
-        firstName: 'John',
-        lastName: 'Doe',
-        age: 100
-      };
-
-      if (payload) {
-        const user = await User.findById(payload.sub);
+        const user = await User.findById(payloadSub);
         if (user) {
           const res = await req
             .put(`/api/users/${user.id}`)
@@ -59,14 +68,12 @@ describe('users route', () => {
           expect(res.body.user.lastName).toBe(updatedInfo.lastName);
           expect(res.body.user.age).toBe(updatedInfo.age);
         }
-      }
+      });
     });
 
-    it('should return status 200 and the deleted user', async () => {
-      const payload = jwt.decode(jwtToken);
-
-      if (payload) {
-        const user = await User.findById(payload.sub);
+    describe('/api/users/:userid DELETE', () => {
+      it('should return status 200 and the deleted user', async () => {
+        const user = await User.findById(payloadSub);
 
         if (user) {
           const res = await req
@@ -78,7 +85,33 @@ describe('users route', () => {
 
           expect(res.body.user.username).toBe(user.username);
         }
-      }
+      });
+    });
+  });
+
+  describe('given unauthorized', () => {
+    describe('/api/users GET', () => {
+      it('should return status 401', async () => {
+        const res = await req.get('/api/users');
+
+        expect(res.status).toBe(401);
+      });
+    });
+
+    describe('/api/users/:userid PUT', () => {
+      it('should return status 401', async () => {
+        const res = await req.put(`/api/users/${payloadSub}`);
+
+        expect(res.status).toBe(401);
+      });
+    });
+
+    describe('/api/users/:userid DELETE', () => {
+      it('should return status 401', async () => {
+        const res = await req.delete(`/api/users/${payloadSub}`);
+
+        expect(res.status).toBe(401);
+      });
     });
   });
 });
