@@ -1,6 +1,6 @@
 import { Schema, model, Types } from 'mongoose';
 
-interface IGoal {
+export interface IGoal {
   title: string;
   description: string;
   location: string;

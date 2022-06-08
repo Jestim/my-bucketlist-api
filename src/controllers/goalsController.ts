@@ -14,7 +14,6 @@ const createGoalPost = [
   body('location').trim().escape(),
 
   (req: Request, res: Response, next: NextFunction) => {
-    console.log('saved');
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -32,11 +31,11 @@ const createGoalPost = [
         creator: req.user.id
       });
 
-      newGoal.save((err, theGoal) => {
+      newGoal.save((err, goal) => {
         if (err) {
           return next(err);
         }
-        res.json({ message: 'New goal created', theGoal });
+        res.json({ message: 'New goal created', goal });
       });
     } else {
       res.status(401).json({ message: 'User is not logged in' });
@@ -68,17 +67,17 @@ const updateGoalPost = [
     if (req.user) {
       Goal.findOneAndUpdate({ id: goalId, creator: req.user.id }, updatedInfo, {
         returnDocument: 'after'
-      }).exec((err, theGoal) => {
+      }).exec((err, goal) => {
         if (err) {
           return next(err);
         }
 
-        if (!theGoal) {
+        if (!goal) {
           res
             .status(403)
             .json({ message: 'You are not the creator of this goal' });
         } else {
-          res.status(200).json({ message: 'Goal update', theGoal });
+          res.status(200).json({ message: 'Goal updated', goal });
         }
       });
     } else {
@@ -93,17 +92,17 @@ const deleteGoalPost = (req: Request, res: Response, next: NextFunction) => {
   const goalId = req.params.goalid;
   if (req.user) {
     Goal.findOneAndDelete({ id: goalId, creator: req.user.id }).exec(
-      (err, theGoal) => {
+      (err, goal) => {
         if (err) {
           return next(err);
         }
 
-        if (!theGoal) {
+        if (!goal) {
           res
             .status(403)
             .json({ message: 'You are not the creator of this goal' });
         } else {
-          res.json({ message: 'Goal deleted', theGoal });
+          res.json({ message: 'Goal deleted', goal });
         }
       }
     );

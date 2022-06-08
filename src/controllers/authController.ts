@@ -76,7 +76,7 @@ const signUp = [
         age
       });
 
-      newUser.save((error, theUser) => {
+      newUser.save((error, user) => {
         if (error) {
           next(error);
         }
@@ -84,11 +84,11 @@ const signUp = [
         res.json({
           message: 'User created',
           user: {
-            username: theUser.username,
-            email: theUser.email,
-            firstName: theUser.firstName,
-            lastName: theUser.lastName,
-            age: theUser.age
+            username: user.username,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            age: user.age
           }
         });
       });

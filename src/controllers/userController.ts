@@ -51,22 +51,22 @@ const updateUserPut = [
 
       User.findByIdAndUpdate(req.params.userid, updates, {
         returnDocument: 'after'
-      }).exec((err, updatedUser) => {
+      }).exec((err, user) => {
         if (err) {
           return next(err);
         }
 
-        if (!updatedUser) {
+        if (!user) {
           res.status(400).json({ message: 'Invalid user id' });
         } else {
           res.json({
             message: 'User updated',
             user: {
-              username: updatedUser.username,
-              email: updatedUser.email,
-              firstName: updatedUser.firstName,
-              lastName: updatedUser.lastName,
-              age: updatedUser.age
+              username: user.username,
+              email: user.email,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              age: user.age
             }
           });
         }
@@ -87,21 +87,21 @@ const deleteUserDelete = (req: Request, res: Response, next: NextFunction) => {
     res.status(401).json('User is not logged in');
   }
 
-  User.findByIdAndDelete(req.params.userid).exec((err, deletedUser) => {
+  User.findByIdAndDelete(req.params.userid).exec((err, user) => {
     if (err) {
       return next(err);
     }
 
-    if (!deletedUser) {
+    if (!user) {
       res.status(400).json({ message: 'Could not find user' });
     } else {
       res.json({
         message: 'User deleted',
         user: {
-          username: deletedUser.username,
-          firstName: deletedUser.firstName,
-          lastName: deletedUser.lastName,
-          age: deletedUser.age
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          age: user.age
         }
       });
     }
