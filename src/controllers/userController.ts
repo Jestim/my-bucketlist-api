@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { body, param, validationResult } from 'express-validator';
+import Goal from '../models/Goal';
 import User from '../models/User';
 
 // GET ALL USERS
@@ -109,18 +110,99 @@ const deleteUserDelete = (req: Request, res: Response, next: NextFunction) => {
 };
 
 // GET A USERS GOALS
-const userGoalsGet = (req: Request, res: Response) => {
-  res.json('Returns a users goals');
-};
+const userGoalsGet = (req: Request, res: Response, next: NextFunction) => {
+  param('userid').escape();
 
-// GET A USERS GOAL FEED
-const userGoalFeedGet = (req: Request, res: Response) => {
-  res.json('Returns a users goalsfeed');
+  Goal.find({ creator: req.params.userid }).exec((err, goals) => {
+    if (err) {
+      return next(err);
+    }
+
+    if (goals.length === 0) {
+      res.json({ message: 'User has no goals' });
+    } else {
+      res.json(goals);
+    }
+  });
 };
 
 // GET A USERS SPECIFIC GOAL
-const userGoalGet = (req: Request, res: Response) => {
-  res.json('Returns a users specific goal');
+const userGoalGet = (req: Request, res: Response, next: NextFunction) => {
+  param('userid').escape();
+  param('goalid').escape();
+
+  Goal.findOne({ creator: req.params.userid, id: req.params.goalid }).exec(
+    (err, goal) => {
+      if (err) {
+        return next(err);
+      }
+
+      if (!goal) {
+        res.json({ message: 'Could not find goal' });
+      } else {
+        res.json(goal);
+      }
+    }
+  );
+};
+
+// GET A USERS GOAL FEED
+const userGoalFeedGet = (req: Request, res: Response, next: NextFunction) => {
+  res.json('Returns a users goals feed');
+};
+
+// ADD FRIEND
+const addFriendGet = (req: Request, res: Response, next: NextFunction) => {
+  body('friendid').trim().escape();
+
+  if (req.user) {
+    User.findByIdAndUpdate(
+      req.user.id,
+      {
+        $push: { friends: req.body.friendid }
+      },
+      { returnDocument: 'after' }
+    ).exec((err, user) => {
+      if (err) {
+        next(err);
+      }
+
+      if (!user) {
+        res.json({ message: 'Could not find user' });
+      } else {
+        res.json({ message: 'Friend added to friends list', user });
+      }
+    });
+  }
+};
+
+// REMOVE FRIEND
+const removeFriendDelete = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  param('friendid').trim().escape();
+
+  if (req.user) {
+    User.findByIdAndUpdate(
+      req.user.id,
+      {
+        $pull: { friends: req.params.userid }
+      },
+      { returnDocument: 'after' }
+    ).exec((err, user) => {
+      if (err) {
+        next(err);
+      }
+
+      if (!user) {
+        res.json({ message: 'Could not find user' });
+      } else {
+        res.json({ message: 'Friend removed from friends list', user });
+      }
+    });
+  }
 };
 
 export default {
@@ -129,5 +211,7 @@ export default {
   deleteUserDelete,
   userGoalsGet,
   userGoalFeedGet,
-  userGoalGet
+  userGoalGet,
+  addFriendGet,
+  removeFriendDelete
 };

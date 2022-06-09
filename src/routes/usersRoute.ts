@@ -10,7 +10,7 @@ router.get('/', userController.UsersListGet);
 router.get('/:userid/goals', userController.userGoalsGet);
 
 // GET A USERS GOAL FEED
-router.get('/:userid/goalsfeed', userController.userGoalFeedGet);
+router.get('/:userid/goals-feed', userController.userGoalFeedGet);
 
 // GET A USERS SPECIFIC GOAL
 router.get('/:userid/goals/:goalid', userController.userGoalGet);
@@ -20,5 +20,11 @@ router.put('/:userid', userController.updateUserPut);
 
 // DELETE USER
 router.delete('/:userid', userController.deleteUserDelete);
+
+// ADD FRIEND
+router.post('/friends/', userController.addFriendGet);
+
+// REMOVE FRIEND
+router.delete('/friends/:userid', userController.removeFriendDelete);
 
 export default router;
