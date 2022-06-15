@@ -9,6 +9,7 @@ import logInUser from '../../helpers/testHelpers/logInUser';
 const req = request(app);
 let jwtToken: string;
 let payloadSub: string;
+let allUsers: IUser[];
 
 beforeAll(async () => {
   await db.connect();
@@ -22,6 +23,8 @@ beforeAll(async () => {
   if (payload && typeof payload.sub === 'string') {
     payloadSub = payload.sub;
   }
+
+  allUsers = await User.find();
 });
 
 afterAll(async () => {
@@ -87,6 +90,24 @@ describe('users route', () => {
         }
       });
     });
+
+    describe('/api/users/friends POST', () => {
+      it('should return status 200 and add a friend to the logged in users friends list and return the updated user', async () => {
+        // TODO
+      });
+    });
+
+    describe('/api/users/friends GET', () => {
+      it('should return status 200 and a list of the logged in users friends', async () => {
+        // TODO
+      });
+    });
+
+    describe('/api/users/friends/:userid DELETE', () => {
+      it('should return status 200 and delete the specified friend and return the updated user', async () => {
+        // TODO
+      });
+    });
   });
 
   describe('given unauthorized', () => {
@@ -109,6 +130,36 @@ describe('users route', () => {
     describe('/api/users/:userid DELETE', () => {
       it('should return status 401', async () => {
         const res = await req.delete(`/api/users/${payloadSub}`);
+
+        expect(res.status).toBe(401);
+      });
+    });
+
+    describe('/api/users/friends POST', () => {
+      it('should return status 401', async () => {
+        const friendid = allUsers[1].id;
+
+        const res = await req.post('/api/users/friends').send(friendid);
+
+        expect(res.status).toBe(401);
+      });
+    });
+
+    describe('/api/users/friends GET', () => {
+      it('should return status 401', async () => {
+        const res = await req.get('/api/users/friends');
+
+        expect(res.status).toBe(401);
+      });
+    });
+
+    describe('/api/users/friends/:userid DELETE', () => {
+      it('should return status 401', async () => {
+        const friendid = allUsers[1].id;
+
+        const res = await req
+          .post(`/api/users/friends/${friendid}`)
+          .send(friendid);
 
         expect(res.status).toBe(401);
       });

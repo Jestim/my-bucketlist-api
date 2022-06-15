@@ -12,4 +12,7 @@ router.put('/:goalid', goalsController.updateGoalPost);
 // DELETE GOAL
 router.delete('/:goalid', goalsController.deleteGoalPost);
 
+// GET A USERS GOAL FEED
+router.get('/goals-feed', goalsController.userGoalFeedGet);
+
 export default router;

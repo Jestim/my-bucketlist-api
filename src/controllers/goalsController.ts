@@ -1,7 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import { body, param, validationResult } from 'express-validator';
 import Goal from '../models/Goal';
+import User from '../models/User';
 
+// CREATE A NEW GOAL
 const createGoalPost = [
   body('title')
     .trim()
@@ -43,6 +45,7 @@ const createGoalPost = [
   }
 ];
 
+// UPDATE GOAL
 const updateGoalPost = [
   body('title')
     .trim()
@@ -86,6 +89,7 @@ const updateGoalPost = [
   }
 ];
 
+// DELETE GOAL
 const deleteGoalPost = (req: Request, res: Response, next: NextFunction) => {
   param('goalid').escape();
 
@@ -111,8 +115,42 @@ const deleteGoalPost = (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+// GET A USERS GOAL FEED
+const userGoalFeedGet = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (req.user) {
+    const user = await User.findById(req.user.id);
+
+    if (user) {
+      const userIds = user.friends;
+      userIds.push(user.id);
+
+      Goal.find()
+        .where('creator')
+        .in(userIds)
+        .exec((err, goals) => {
+          if (err) {
+            return next(err);
+          }
+
+          if (goals) {
+            res.json({ message: 'Users goal feed', goals });
+          }
+        });
+    } else {
+      res.status(400).json({ message: 'Could not find user' });
+    }
+  } else {
+    res.status(401).json({ message: 'User is not logged in' });
+  }
+};
+
 export default {
   createGoalPost,
   updateGoalPost,
-  deleteGoalPost
+  deleteGoalPost,
+  userGoalFeedGet
 };

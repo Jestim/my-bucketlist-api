@@ -39,7 +39,7 @@ const updateUserPut = [
 
     if (req.user) {
       if (req.user.id.toString() !== req.params.userid) {
-        res.status(403).json('You can only update your own user');
+        res.status(403).json({ message: 'You can only update your own user' });
       }
 
       const { firstName, lastName, age } = req.body;
@@ -85,7 +85,7 @@ const deleteUserDelete = (req: Request, res: Response, next: NextFunction) => {
       res.status(403).json({ message: 'You can only delete your own user' });
     }
   } else {
-    res.status(401).json('User is not logged in');
+    res.status(401).json({ message: 'User is not logged in' });
   }
 
   User.findByIdAndDelete(req.params.userid).exec((err, user) => {
@@ -146,14 +146,9 @@ const userGoalGet = (req: Request, res: Response, next: NextFunction) => {
   );
 };
 
-// GET A USERS GOAL FEED
-const userGoalFeedGet = (req: Request, res: Response, next: NextFunction) => {
-  res.json('Returns a users goals feed');
-};
-
 // GET FRIENDS
 const friendsListGet = (req: Request, res: Response, next: NextFunction) => {
-  console.log('friendsListGet called');
+  console.log('GET FRIENDS CALLED');
   if (req.user) {
     User.findById(req.user.id)
       .populate('friends', ['username', 'firstName', 'lastName', 'age'])
@@ -245,7 +240,6 @@ export default {
   updateUserPut,
   deleteUserDelete,
   userGoalsGet,
-  userGoalFeedGet,
   userGoalGet,
   friendsListGet,
   addFriendPost,

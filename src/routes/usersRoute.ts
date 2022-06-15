@@ -9,9 +9,6 @@ router.get('/', userController.usersListGet);
 // GET A USERS GOALS
 router.get('/:userid/goals', userController.userGoalsGet);
 
-// GET A USERS GOAL FEED
-router.get('/:userid/goals-feed', userController.userGoalFeedGet);
-
 // GET A USERS SPECIFIC GOAL
 router.get('/:userid/goals/:goalid', userController.userGoalGet);
 
