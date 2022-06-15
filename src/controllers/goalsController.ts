@@ -58,6 +58,12 @@ const updateGoalPost = [
   body('location').trim().escape(),
 
   (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      res.status(400).json(errors.array());
+    }
+
     const goalId = req.params.goalid;
 
     const { title, description, location } = req.body;
@@ -148,9 +154,41 @@ const userGoalFeedGet = async (
   }
 };
 
+const updateGoalPrivacyPut = [
+  param('goalid').escape(),
+
+  body('isPrivate', 'Value must be boolean').trim().isBoolean().escape(),
+
+  (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      res.status(400).json(errors.array());
+    }
+
+    const privacyStatus = req.body.isPrivate === 'true';
+    Goal.findByIdAndUpdate(
+      req.params.goalid,
+      { isPrivate: privacyStatus },
+      { returnDocument: 'after' }
+    ).exec((err, goal) => {
+      if (err) {
+        return next(err);
+      }
+
+      if (!goal) {
+        res.status(400).json({ message: 'Could not find goal' });
+      }
+
+      res.json({ message: 'Goal privacy status updated', goal });
+    });
+  }
+];
+
 export default {
   createGoalPost,
   updateGoalPost,
   deleteGoalPost,
-  userGoalFeedGet
+  userGoalFeedGet,
+  updateGoalPrivacyPut
 };
