@@ -4,7 +4,7 @@ import userController from '../controllers/userController';
 const router = Router();
 
 // GET ALL USERS
-router.get('/', userController.UsersListGet);
+router.get('/', userController.usersListGet);
 
 // GET A USERS GOALS
 router.get('/:userid/goals', userController.userGoalsGet);
@@ -21,8 +21,11 @@ router.put('/:userid', userController.updateUserPut);
 // DELETE USER
 router.delete('/:userid', userController.deleteUserDelete);
 
+// GET FRIENDS
+router.get('/friends', userController.friendsListGet);
+
 // ADD FRIEND
-router.post('/friends/', userController.addFriendGet);
+router.post('/friends', userController.addFriendPost);
 
 // REMOVE FRIEND
 router.delete('/friends/:userid', userController.removeFriendDelete);

@@ -4,7 +4,7 @@ import Goal from '../models/Goal';
 import User from '../models/User';
 
 // GET ALL USERS
-const UsersListGet = (req: Request, res: Response, next: NextFunction) => {
+const usersListGet = (req: Request, res: Response, next: NextFunction) => {
   User.find({}, { password: 0, updatedAt: 0, __v: 0 }).exec((err, users) => {
     if (err) {
       return next(err);
@@ -151,9 +151,44 @@ const userGoalFeedGet = (req: Request, res: Response, next: NextFunction) => {
   res.json('Returns a users goals feed');
 };
 
+// GET FRIENDS
+const friendsListGet = (req: Request, res: Response, next: NextFunction) => {
+  console.log('friendsListGet called');
+  if (req.user) {
+    User.findById(req.user.id)
+      .populate('friends', ['username', 'firstName', 'lastName', 'age'])
+      .exec((err, user) => {
+        if (err) {
+          return next(err);
+        }
+
+        if (!user) {
+          res.status(400).json({ message: 'Could not find user' });
+        } else {
+          res.json({
+            message: 'Successfully retrieved friend list',
+            friends: user.friends
+          });
+        }
+      });
+  } else {
+    res.status(401).json('User is not logged in');
+  }
+};
+
 // ADD FRIEND
-const addFriendGet = (req: Request, res: Response, next: NextFunction) => {
+const addFriendPost = (req: Request, res: Response, next: NextFunction) => {
   body('friendid').trim().escape();
+
+  User.findById(req.body.friendid).exec((err, user) => {
+    if (err) {
+      return next(err);
+    }
+
+    if (!user) {
+      res.json({ message: 'User does not exist' });
+    }
+  });
 
   if (req.user) {
     User.findByIdAndUpdate(
@@ -206,12 +241,13 @@ const removeFriendDelete = (
 };
 
 export default {
-  UsersListGet,
+  usersListGet,
   updateUserPut,
   deleteUserDelete,
   userGoalsGet,
   userGoalFeedGet,
   userGoalGet,
-  addFriendGet,
+  friendsListGet,
+  addFriendPost,
   removeFriendDelete
 };
