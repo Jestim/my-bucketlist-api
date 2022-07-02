@@ -71,8 +71,8 @@ const signUp = [
         username,
         email,
         password: hashedPassword,
-        firstName,
-        lastName,
+        firstName: firstName.charAt(0).toUpperCase() + firstName.slice(1),
+        lastName: lastName.charAt(0).toUpperCase() + lastName.slice(1),
         age
       });
 
@@ -119,7 +119,7 @@ const logIn = [
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-      res.json(errors.array());
+      res.status(400).json(errors.array());
     }
 
     User.findOne({ username: req.body.username }, (err: Error, user: IUser) => {
@@ -129,8 +129,10 @@ const logIn = [
       const payload = {
         sub: user.id,
         iat: Date.now(),
-        exp: Date.now() + 1000 * 60 * 60 * 24 * 7
+        exp: Date.now() + 1000 * 60
       };
+
+      // exp: Date.now() + 1000 * 60 * 60 * 24 * 7
 
       const jwtSecret = process.env.JWT_SECRET;
 
@@ -141,7 +143,17 @@ const logIn = [
   }
 ];
 
+// CHECK IF USER IS LOGGED IN
+const isLoggedIn = [
+  passport.authenticate('jwt', { session: false, failWithError: true }),
+
+  (req: Request, res: Response) => {
+    res.json({ isLoggedIn: true });
+  }
+];
+
 export default {
   signUp,
-  logIn
+  logIn,
+  isLoggedIn
 };

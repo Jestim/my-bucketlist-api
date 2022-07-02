@@ -11,15 +11,21 @@ const jwtAuth = (passport: PassportStatic) => {
         secretOrKey: process.env.JWT_SECRET
       },
       (jwtPayload, done) => {
-        User.findById(jwtPayload.sub, (err: Error, user: IUser) => {
-          if (err) {
-            return done(err, false);
-          }
+        // If jwt has not expired
+        if (jwtPayload.exp > Date.now().toString()) {
+          User.findById(jwtPayload.sub, (err: Error, user: IUser) => {
+            if (err) {
+              return done(err, false);
+            }
 
-          if (user) {
-            return done(null, user);
-          }
-        });
+            if (user) {
+              return done(null, user);
+            }
+            return done(null, false);
+          });
+        } else {
+          done(null, false);
+        }
       }
     )
   );

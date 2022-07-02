@@ -25,4 +25,12 @@ const goalSchema = new Schema<IGoal>(
   { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } }
 );
 
+goalSchema.virtual('id').get(function returnIdField() {
+  return this._id.toHexString();
+});
+
+goalSchema.set('toJSON', {
+  virtuals: true
+});
+
 export default model<IGoal>('Goal', goalSchema);

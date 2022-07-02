@@ -11,11 +11,13 @@ router.use(
   passport.authenticate('jwt', { session: false }),
   usersRoute
 );
+
 router.use(
   '/goals',
   passport.authenticate('jwt', { session: false }),
   goalsRoute
 );
+
 router.use('/auth', authRoute);
 
 export default router;

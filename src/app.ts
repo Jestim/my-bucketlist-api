@@ -1,12 +1,14 @@
 import express, { Express, Request, Response } from 'express';
 import 'dotenv/config';
 import passport from 'passport';
+import cors from 'cors';
 import apiRouter from './routes/apiRouter';
 import passportConfig from './config/passport';
 import jwtAuth from './middleware/jwtAuth';
 
 const app: Express = express();
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -17,15 +19,7 @@ app.use('/api', apiRouter);
 
 app.get('/', (req: Request, res: Response) => {
   res.json('Hi there! Got to /api for access to the data');
+  console.log('REQUEST RECIEVED');
 });
-
-// JWT PROTECTED TEST ROUTE
-app.get(
-  '/protected',
-  passport.authenticate('jwt', { session: false }),
-  (req, res) => {
-    res.json('this is a jwt protected route');
-  }
-);
 
 export default app;

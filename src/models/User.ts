@@ -1,7 +1,7 @@
 import { Schema, model, Types } from 'mongoose';
 
 export interface IUser {
-  id: Schema.Types.ObjectId;
+  id: Types.ObjectId;
   username: string;
   email: string;
   password: string;
@@ -26,6 +26,14 @@ const userSchema = new Schema<IUser>(
 
 userSchema.virtual<IUser>('name').get(function fullName() {
   return `${this.firstName} ${this.lastName}`;
+});
+
+userSchema.virtual('id').get(function returnIdField() {
+  return this._id.toHexString();
+});
+
+userSchema.set('toJSON', {
+  virtuals: true
 });
 
 export default model<IUser>('User', userSchema);
