@@ -14,6 +14,36 @@ const usersListGet = (req: Request, res: Response, next: NextFunction) => {
   });
 };
 
+// GET USER BY ID
+const userDetailsById = (req: Request, res: Response, next: NextFunction) => {
+  User.findById(req.params.userid, { password: 0 })
+    .populate('friends')
+    .exec((err, user) => {
+      if (err) {
+        return next(err);
+      }
+
+      res.json(user);
+    });
+};
+
+// GET USER BY USERNAME
+const userDetailsByUsername = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  User.findOne({ username: req.params.username }, { password: 0 })
+    .populate('friends')
+    .exec((err, user) => {
+      if (err) {
+        return next(err);
+      }
+
+      res.json(user);
+    });
+};
+
 // UPDATE USER
 const updateUserPut = [
   body('firstName')
@@ -131,7 +161,7 @@ const userGoalGet = (req: Request, res: Response, next: NextFunction) => {
   param('userid').escape();
   param('goalid').escape();
 
-  Goal.findOne({ creator: req.params.userid, id: req.params.goalid }).exec(
+  Goal.findOne({ creator: req.params.userid, _id: req.params.goalid }).exec(
     (err, goal) => {
       if (err) {
         return next(err);
@@ -237,6 +267,8 @@ const removeFriendDelete = (
 
 export default {
   usersListGet,
+  userDetailsById,
+  userDetailsByUsername,
   updateUserPut,
   deleteUserDelete,
   userGoalsGet,

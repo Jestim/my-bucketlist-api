@@ -6,6 +6,12 @@ const router = Router();
 // GET ALL USERS
 router.get('/', userController.usersListGet);
 
+// GET USER BY ID
+router.get('/:userid', userController.userDetailsById);
+
+// GET USER BY USERNAME
+router.get('/username/:username', userController.userDetailsByUsername);
+
 // GET A USERS GOALS
 router.get('/:userid/goals', userController.userGoalsGet);
 

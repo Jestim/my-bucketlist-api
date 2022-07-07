@@ -129,7 +129,7 @@ const logIn = [
       const payload = {
         sub: user.id,
         iat: Date.now(),
-        exp: Date.now() + 1000 * 60
+        exp: Date.now() + 1000 * 60 * 60 * 24 * 7
       };
 
       // exp: Date.now() + 1000 * 60 * 60 * 24 * 7
