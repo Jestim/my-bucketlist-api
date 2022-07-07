@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { body, param, validationResult } from 'express-validator';
 import Goal from '../models/Goal';
-import User from '../models/User';
+import User, { IFriendRequest } from '../models/User';
 
 // GET ALL USERS
 const usersListGet = (req: Request, res: Response, next: NextFunction) => {
@@ -205,21 +205,20 @@ const friendsListGet = (req: Request, res: Response, next: NextFunction) => {
 const addFriendPost = (req: Request, res: Response, next: NextFunction) => {
   body('friendid').trim().escape();
 
-  User.findById(req.body.friendid).exec((err, user) => {
-    if (err) {
-      return next(err);
-    }
-
-    if (!user) {
-      res.json({ message: 'User does not exist' });
-    }
-  });
-
   if (req.user) {
+    console.log(req.user);
+
+    // Create a friend request with friends id
+    const friendrequest: IFriendRequest = {
+      userId: req.body.friendid,
+      status: 'pending'
+    };
+
+    // Find current user and add the friendrequest
     User.findByIdAndUpdate(
       req.user.id,
       {
-        $push: { friends: req.body.friendid }
+        $push: { friendRequests: friendrequest }
       },
       { returnDocument: 'after' }
     ).exec((err, user) => {
@@ -228,11 +227,31 @@ const addFriendPost = (req: Request, res: Response, next: NextFunction) => {
       }
 
       if (!user) {
-        res.json({ message: 'Could not find user' });
+        res.status(400).json({ message: 'Could not find user' });
       } else {
-        res.json({ message: 'Friend added to friends list', user });
+        // Find the friend and add the request to that user
+        const currentUser: IFriendRequest = {
+          userId: user.id,
+          status: 'pending'
+        };
+
+        User.findByIdAndUpdate(req.body.friendid, {
+          $push: { friendRequests: currentUser }
+        }).exec((error, friend) => {
+          if (error) {
+            return next(error);
+          }
+
+          if (!friend) {
+            res.status(400).json({ message: 'Could not find user' });
+          } else {
+            res.json({ message: 'Friend request sent', user });
+          }
+        });
       }
     });
+  } else {
+    res.status(401).json({ message: 'User id not logged in' });
   }
 };
 
