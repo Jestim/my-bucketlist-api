@@ -81,7 +81,7 @@ const signUp = [
           next(error);
         }
 
-        res.json({
+        return res.json({
           message: 'User created',
           user: {
             username: user.username,
@@ -119,7 +119,7 @@ const logIn = [
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-      res.status(400).json(errors.array());
+      return res.status(400).json(errors.array());
     }
 
     User.findOne({ username: req.body.username }, (err: Error, user: IUser) => {
@@ -138,7 +138,7 @@ const logIn = [
 
       const token = jwt.sign(payload, jwtSecret);
 
-      res.json({ token });
+      return res.json({ token });
     });
   }
 ];
@@ -147,9 +147,7 @@ const logIn = [
 const isLoggedIn = [
   passport.authenticate('jwt', { session: false, failWithError: true }),
 
-  (req: Request, res: Response) => {
-    res.json({ isLoggedIn: true });
-  }
+  (req: Request, res: Response) => res.json({ isLoggedIn: true })
 ];
 
 export default {

@@ -2,8 +2,8 @@ export const userInput = {
   username: 'test',
   email: 'test@test.com',
   password: 'abc',
-  firstName: 'test',
-  lastName: 'testson',
+  firstName: 'Test',
+  lastName: 'Testson',
   age: 20
 };
 

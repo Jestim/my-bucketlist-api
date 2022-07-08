@@ -27,8 +27,8 @@ router.delete('/:userid', userController.deleteUserDelete);
 // GET FRIENDS
 router.get('/friends', userController.friendsListGet);
 
-// ADD FRIEND
-router.post('/friends', userController.addFriendPost);
+// SEND FRIEND REQUEST
+router.post('/friends', userController.sendFriendRequestPost);
 
 // REMOVE FRIEND
 router.delete('/friends/:userid', userController.removeFriendDelete);

@@ -19,7 +19,7 @@ const createGoalPost = [
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-      res.json(errors.array());
+      return res.json(errors.array());
     }
 
     if (req.user) {
@@ -37,10 +37,10 @@ const createGoalPost = [
         if (err) {
           return next(err);
         }
-        res.json({ message: 'New goal created', goal });
+        return res.json({ message: 'New goal created', goal });
       });
     } else {
-      res.status(401).json({ message: 'User is not logged in' });
+      return res.status(401).json({ message: 'User is not logged in' });
     }
   }
 ];
@@ -61,7 +61,7 @@ const updateGoalPost = [
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-      res.status(400).json(errors.array());
+      return res.status(400).json(errors.array());
     }
 
     const goalId = req.params.goalid;
@@ -89,15 +89,14 @@ const updateGoalPost = [
         console.log(goal);
 
         if (!goal) {
-          res
+          return res
             .status(403)
             .json({ message: 'You are not the creator of this goal' });
-        } else {
-          res.status(200).json({ message: 'Goal updated', goal });
         }
+        return res.status(200).json({ message: 'Goal updated', goal });
       });
     } else {
-      res.status(401).json({ message: 'User is not logged in' });
+      return res.status(401).json({ message: 'User is not logged in' });
     }
   }
 ];
@@ -115,16 +114,15 @@ const deleteGoalPost = (req: Request, res: Response, next: NextFunction) => {
         }
 
         if (!goal) {
-          res
+          return res
             .status(403)
             .json({ message: 'You are not the creator of this goal' });
-        } else {
-          res.json({ message: 'Goal deleted', goal });
         }
+        return res.json({ message: 'Goal deleted', goal });
       }
     );
   } else {
-    res.status(401).json({ message: 'User is not logged in' });
+    return res.status(401).json({ message: 'User is not logged in' });
   }
 };
 
@@ -150,15 +148,14 @@ const userGoalFeedGet = async (
           }
 
           if (goals) {
-            res.json({ message: 'Users goal feed', goals });
+            return res.json({ message: 'Users goal feed', goals });
           }
         });
     } else {
-      res.status(400).json({ message: 'Could not find user' });
+      return res.status(400).json({ message: 'Could not find user' });
     }
-  } else {
-    res.status(401).json({ message: 'User is not logged in' });
   }
+  return res.status(401).json({ message: 'User is not logged in' });
 };
 
 const updateGoalPrivacyPut = [
@@ -170,7 +167,7 @@ const updateGoalPrivacyPut = [
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-      res.status(400).json(errors.array());
+      return res.status(400).json(errors.array());
     }
 
     const privacyStatus = req.body.isPrivate === 'true';
@@ -184,10 +181,10 @@ const updateGoalPrivacyPut = [
       }
 
       if (!goal) {
-        res.status(400).json({ message: 'Could not find goal' });
+        return res.status(400).json({ message: 'Could not find goal' });
       }
 
-      res.json({ message: 'Goal privacy status updated', goal });
+      return res.json({ message: 'Goal privacy status updated', goal });
     });
   }
 ];

@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { body, param, validationResult } from 'express-validator';
+import isValidObjectId from '../helpers/isValidObjectId';
 import Goal from '../models/Goal';
 import User, { IFriendRequest } from '../models/User';
 
@@ -10,7 +11,7 @@ const usersListGet = (req: Request, res: Response, next: NextFunction) => {
       return next(err);
     }
 
-    res.json(users);
+    return res.json(users);
   });
 };
 
@@ -23,7 +24,7 @@ const userDetailsById = (req: Request, res: Response, next: NextFunction) => {
         return next(err);
       }
 
-      res.json(user);
+      return res.json(user);
     });
 };
 
@@ -40,7 +41,7 @@ const userDetailsByUsername = (
         return next(err);
       }
 
-      res.json(user);
+      return res.json(user);
     });
 };
 
@@ -64,12 +65,14 @@ const updateUserPut = [
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-      res.json(errors.array());
+      return res.json(errors.array());
     }
 
     if (req.user) {
       if (req.user.id.toString() !== req.params.userid) {
-        res.status(403).json({ message: 'You can only update your own user' });
+        return res
+          .status(403)
+          .json({ message: 'You can only update your own user' });
       }
 
       const { firstName, lastName, age } = req.body;
@@ -88,19 +91,18 @@ const updateUserPut = [
         }
 
         if (!user) {
-          res.status(400).json({ message: 'Invalid user id' });
-        } else {
-          res.json({
-            message: 'User updated',
-            user: {
-              username: user.username,
-              email: user.email,
-              firstName: user.firstName,
-              lastName: user.lastName,
-              age: user.age
-            }
-          });
+          return res.status(400).json({ message: 'Invalid user id' });
         }
+        return res.json({
+          message: 'User updated',
+          user: {
+            username: user.username,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            age: user.age
+          }
+        });
       });
     }
   }
@@ -112,10 +114,12 @@ const deleteUserDelete = (req: Request, res: Response, next: NextFunction) => {
 
   if (req.user) {
     if (req.user.id.toString() !== req.params.userid) {
-      res.status(403).json({ message: 'You can only delete your own user' });
+      return res
+        .status(403)
+        .json({ message: 'You can only delete your own user' });
     }
   } else {
-    res.status(401).json({ message: 'User is not logged in' });
+    return res.status(401).json({ message: 'User is not logged in' });
   }
 
   User.findByIdAndDelete(req.params.userid).exec((err, user) => {
@@ -124,18 +128,17 @@ const deleteUserDelete = (req: Request, res: Response, next: NextFunction) => {
     }
 
     if (!user) {
-      res.status(400).json({ message: 'Could not find user' });
-    } else {
-      res.json({
-        message: 'User deleted',
-        user: {
-          username: user.username,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          age: user.age
-        }
-      });
+      return res.status(400).json({ message: 'Could not find user' });
     }
+    return res.json({
+      message: 'User deleted',
+      user: {
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        age: user.age
+      }
+    });
   });
 };
 
@@ -149,10 +152,9 @@ const userGoalsGet = (req: Request, res: Response, next: NextFunction) => {
     }
 
     if (goals.length === 0) {
-      res.json({ message: 'User has no goals' });
-    } else {
-      res.json(goals);
+      return res.json({ message: 'User has no goals' });
     }
+    return res.json(goals);
   });
 };
 
@@ -168,17 +170,15 @@ const userGoalGet = (req: Request, res: Response, next: NextFunction) => {
       }
 
       if (!goal) {
-        res.json({ message: 'Could not find goal' });
-      } else {
-        res.json(goal);
+        return res.json({ message: 'Could not find goal' });
       }
+      return res.json(goal);
     }
   );
 };
 
 // GET FRIENDS
 const friendsListGet = (req: Request, res: Response, next: NextFunction) => {
-  console.log('GET FRIENDS CALLED');
   if (req.user) {
     User.findById(req.user.id)
       .populate('friends', ['username', 'firstName', 'lastName', 'age'])
@@ -188,22 +188,31 @@ const friendsListGet = (req: Request, res: Response, next: NextFunction) => {
         }
 
         if (!user) {
-          res.status(400).json({ message: 'Could not find user' });
-        } else {
-          res.json({
-            message: 'Successfully retrieved friend list',
-            friends: user.friends
-          });
+          return res.status(400).json({ message: 'Could not find user' });
         }
+        return res.json({
+          message: 'Successfully retrieved friend list',
+          friends: user.friends
+        });
       });
   } else {
-    res.status(401).json('User is not logged in');
+    return res.status(401).json('User is not logged in');
   }
 };
 
-// ADD FRIEND
-const addFriendPost = (req: Request, res: Response, next: NextFunction) => {
+// SEND FRIEND REQUEST
+const sendFriendRequestPost = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   body('friendid').trim().escape();
+
+  if (!isValidObjectId(req.body.friendid)) {
+    console.log('friendid is null');
+
+    return res.status(400).json({ message: 'Could not find user' });
+  }
 
   if (req.user) {
     console.log(req.user);
@@ -218,40 +227,38 @@ const addFriendPost = (req: Request, res: Response, next: NextFunction) => {
     User.findByIdAndUpdate(
       req.user.id,
       {
-        $push: { friendRequests: friendrequest }
+        $addToSet: { friendRequests: friendrequest }
       },
       { returnDocument: 'after' }
     ).exec((err, user) => {
       if (err) {
-        next(err);
+        return next(err);
       }
 
       if (!user) {
-        res.status(400).json({ message: 'Could not find user' });
-      } else {
-        // Find the friend and add the request to that user
-        const currentUser: IFriendRequest = {
-          userId: user.id,
-          status: 'pending'
-        };
-
-        User.findByIdAndUpdate(req.body.friendid, {
-          $push: { friendRequests: currentUser }
-        }).exec((error, friend) => {
-          if (error) {
-            return next(error);
-          }
-
-          if (!friend) {
-            res.status(400).json({ message: 'Could not find user' });
-          } else {
-            res.json({ message: 'Friend request sent', user });
-          }
-        });
+        return res.status(400).json({ message: 'Could not find user' });
       }
+      // Find the friend and add the request to that user
+      const currentUser: IFriendRequest = {
+        userId: user.id,
+        status: 'pending'
+      };
+
+      User.findByIdAndUpdate(req.body.friendid, {
+        $addToSet: { friendRequests: currentUser }
+      }).exec((error, friend) => {
+        if (error) {
+          return next(error);
+        }
+
+        if (!friend) {
+          return res.status(400).json({ message: 'Could not find user' });
+        }
+        return res.json({ message: 'Friend request sent', user });
+      });
     });
   } else {
-    res.status(401).json({ message: 'User id not logged in' });
+    return res.status(401).json({ message: 'User id not logged in' });
   }
 };
 
@@ -272,14 +279,13 @@ const removeFriendDelete = (
       { returnDocument: 'after' }
     ).exec((err, user) => {
       if (err) {
-        next(err);
+        return next(err);
       }
 
       if (!user) {
-        res.json({ message: 'Could not find user' });
-      } else {
-        res.json({ message: 'Friend removed from friends list', user });
+        return res.json({ message: 'Could not find user' });
       }
+      return res.json({ message: 'Friend removed from friends list', user });
     });
   }
 };
@@ -293,6 +299,6 @@ export default {
   userGoalsGet,
   userGoalGet,
   friendsListGet,
-  addFriendPost,
+  sendFriendRequestPost,
   removeFriendDelete
 };
