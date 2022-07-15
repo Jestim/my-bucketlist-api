@@ -65,7 +65,6 @@ const updateGoalPost = [
     }
 
     const goalId = req.params.goalid;
-    console.log(goalId);
 
     const { title, description, location } = req.body;
     const updatedInfo = {
@@ -85,8 +84,6 @@ const updateGoalPost = [
         if (err) {
           return next(err);
         }
-
-        console.log(goal);
 
         if (!goal) {
           return res

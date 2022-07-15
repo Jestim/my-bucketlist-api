@@ -1,6 +1,6 @@
 export const loginInfo = {
   username: '0',
-  password: 'abc'
+  password: 'abcABC123'
 };
 
 // @ts-ignore
@@ -8,7 +8,7 @@ const populateDbUsers = async (req) => {
   const userInfo = {
     username: '0',
     email: '0@test.com',
-    password: 'abc',
+    password: 'abcABC123',
     firstName: 'test',
     lastName: 'testson',
     age: 10

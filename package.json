@@ -8,7 +8,7 @@
         "start": "node dist/server.js",
         "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/server.js\"",
         "test": "jest",
-        "testing": "jest --watchAll --detectOpenHandles",
+        "testing": "jest --watch -o --detectOpenHandles",
         "test-coverage": "jest --collect-coverage"
     },
     "author": "",

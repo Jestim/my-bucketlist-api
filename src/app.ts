@@ -19,7 +19,6 @@ app.use('/api', apiRouter);
 
 app.get('/', (req: Request, res: Response) => {
   res.json('Hi there! Got to /api for access to the data');
-  console.log('REQUEST RECIEVED');
 });
 
 export default app;

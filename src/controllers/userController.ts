@@ -209,14 +209,10 @@ const sendFriendRequestPost = (
   body('friendid').trim().escape();
 
   if (!isValidObjectId(req.body.friendid)) {
-    console.log('friendid is null');
-
     return res.status(400).json({ message: 'Could not find user' });
   }
 
   if (req.user) {
-    console.log(req.user);
-
     // Create a friend request with friends id
     const friendrequest: IFriendRequest = {
       userId: req.body.friendid,
@@ -258,7 +254,7 @@ const sendFriendRequestPost = (
       });
     });
   } else {
-    return res.status(401).json({ message: 'User id not logged in' });
+    return res.status(401).json({ message: 'User is not logged in' });
   }
 };
 
