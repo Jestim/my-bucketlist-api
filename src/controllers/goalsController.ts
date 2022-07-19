@@ -19,7 +19,7 @@ const createGoalPost = [
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-      return res.json(errors.array());
+      return res.json({ errors: errors.array() });
     }
 
     if (req.user) {
@@ -61,7 +61,7 @@ const updateGoalPost = [
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-      return res.status(400).json(errors.array());
+      return res.status(400).json({ errors: errors.array() });
     }
 
     const goalId = req.params.goalid;
@@ -164,7 +164,7 @@ const updateGoalPrivacyPut = [
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-      return res.status(400).json(errors.array());
+      return res.status(400).json({ errors: errors.array() });
     }
 
     const privacyStatus = req.body.isPrivate === 'true';

@@ -2,7 +2,7 @@ import { Schema, model, Types } from 'mongoose';
 
 export interface IFriendRequest {
   userId: Types.ObjectId;
-  status: 'pending' | 'accepted' | 'rejected';
+  status: 'pending' | 'rejected';
 }
 
 export interface IUser {

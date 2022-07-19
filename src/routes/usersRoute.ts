@@ -6,15 +6,6 @@ const router = Router();
 // GET ALL USERS
 router.get('/', userController.usersListGet);
 
-// GET FRIENDS
-router.get('/friends', userController.friendsListGet);
-
-// SEND FRIEND REQUEST
-router.post('/friends', userController.sendFriendRequestPost);
-
-// REMOVE FRIEND
-router.delete('/friends/:userid', userController.removeFriendDelete);
-
 // GET USER BY ID
 router.get('/:userid', userController.userDetailsById);
 
