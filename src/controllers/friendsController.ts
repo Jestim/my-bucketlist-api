@@ -28,7 +28,7 @@ const friendsListGet = (req: Request, res: Response, next: NextFunction) => {
 };
 
 // SEND FRIEND REQUEST
-const sendFriendRequestPost = (
+const sendFriendRequestPost = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -40,49 +40,45 @@ const sendFriendRequestPost = (
   }
 
   if (req.user) {
-    // Create a friend request with friends id
-    const friendrequest: IFriendRequest = {
-      userId: req.body.friendid,
-      status: 'pending'
-    };
-
-    // Find current user and add the friendrequest
-    User.findByIdAndUpdate(
-      req.user.id,
-      {
-        $addToSet: { friendRequests: friendrequest }
-      },
-      { returnDocument: 'after' }
-    ).exec((err, user) => {
-      if (err) {
-        return next(err);
-      }
+    try {
+      // Find current user and add the friendrequest
+      const user = await User.findById(req.user.id);
 
       if (!user) {
-        return res.status(400).json({ message: 'Could not find user' });
+        res.status(401);
+        throw new Error('Could not find user');
       }
+
       // Find the friend and add the request to that user
-      const currentUser: IFriendRequest = {
+      const friend = await User.findById(req.body.friendid);
+
+      if (!friend) {
+        res.status(400);
+        throw new Error('Could not find user');
+      }
+
+      // Create a friend request with friends id
+      const friendRequestToUser: IFriendRequest = {
+        userId: req.body.friendid,
+        status: 'pending'
+      };
+      user.friendRequests.push(friendRequestToUser);
+      await user.save();
+
+      //   Create a friend request with user id
+      const friendRequestToFriend: IFriendRequest = {
         userId: user.id,
         status: 'pending'
       };
+      friend.friendRequests.push(friendRequestToFriend);
+      await friend.save();
 
-      User.findByIdAndUpdate(req.body.friendid, {
-        $addToSet: { friendRequests: currentUser }
-      }).exec((error, friend) => {
-        if (error) {
-          return next(error);
-        }
-
-        if (!friend) {
-          return res.status(400).json({ message: 'Could not find user' });
-        }
-        return res.json({ message: 'Friend request sent', user });
-      });
-    });
-  } else {
-    return res.status(401).json({ message: 'User is not logged in' });
+      return res.json({ message: 'Friend request sent' });
+    } catch (error: any) {
+      return res.json({ message: error.message });
+    }
   }
+  return res.status(401).json({ message: 'User is not logged in' });
 };
 
 // UPDATE FRIEND REQUEST STATUS
@@ -95,13 +91,13 @@ const acceptOrRejectFriendRequestPut = (
   body('accepted').isBoolean().escape();
 
   if (req.user) {
-    // If accepted add user to friends list
-    console.log(req.body);
+    // If accepted add user to friends array and remove from friendRequests array
+    const accepted = Boolean(req.body.accepted);
 
     // Else update request status to rejected
+  } else {
+    return res.status(401).json({ message: 'User is not logged in' });
   }
-
-  res.end();
 };
 
 // REMOVE FRIEND
@@ -129,6 +125,8 @@ const removeFriendDelete = (
       }
       return res.json({ message: 'Friend removed from friends list', user });
     });
+  } else {
+    return res.status(401).json({ message: 'User is not logged in' });
   }
 };
 
