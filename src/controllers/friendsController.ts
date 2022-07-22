@@ -18,8 +18,7 @@ const friendsListGet = (req: Request, res: Response, next: NextFunction) => {
         }
         return res.json({
           message: 'Successfully retrieved friend list',
-          friends: user.friends,
-          friendRequests: user.friendRequests
+          friends: user.friends
         });
       });
   } else {
@@ -28,11 +27,7 @@ const friendsListGet = (req: Request, res: Response, next: NextFunction) => {
 };
 
 // SEND FRIEND REQUEST
-const sendFriendRequestPost = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const sendFriendRequestPost = async (req: Request, res: Response) => {
   body('friendid').trim().escape();
 
   if (!isValidObjectId(req.body.friendid)) {
@@ -95,9 +90,8 @@ const acceptOrRejectFriendRequestPut = (
     const accepted = Boolean(req.body.accepted);
 
     // Else update request status to rejected
-  } else {
-    return res.status(401).json({ message: 'User is not logged in' });
   }
+  return res.status(401).json({ message: 'User is not logged in' });
 };
 
 // REMOVE FRIEND
