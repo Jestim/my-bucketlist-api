@@ -1,15 +1,15 @@
 import { Schema, model, Types } from 'mongoose';
 
-export interface IRelationship {
+export interface IFriendRequest {
   requester: Types.ObjectId;
   recipient: Types.ObjectId;
-  status: 'accepted' | 'pending' | 'rejected';
+  status: 'pending' | 'rejected';
 }
 
-const relationshipSchema = new Schema<IRelationship>({
+const friendRequestSchema = new Schema<IFriendRequest>({
   requester: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   recipient: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   status: { type: String, required: true }
 });
 
-export default model<IRelationship>('Relationship', relationshipSchema);
+export default model<IFriendRequest>('FriendRequest', friendRequestSchema);

@@ -1,9 +1,9 @@
-import { Schema } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
 declare global {
   namespace Express {
     interface User {
-      id: Schema.Types.ObjectId;
+      id: mongoose.Types.ObjectId;
     }
   }
   namespace NodeJS {

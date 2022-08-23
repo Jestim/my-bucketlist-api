@@ -64,7 +64,7 @@ const signUp = [
 
     bcrypt.hash(password, 10, (err: Error, hashedPassword: string) => {
       if (err) {
-        next(err);
+        return next(err);
       }
 
       const newUser = new User({
@@ -78,7 +78,7 @@ const signUp = [
 
       newUser.save((error, user) => {
         if (error) {
-          next(error);
+          return next(error);
         }
 
         return res.json({

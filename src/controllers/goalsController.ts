@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { body, param, validationResult } from 'express-validator';
+import mongoose from 'mongoose';
 import Goal from '../models/Goal';
 import User from '../models/User';
 
@@ -129,30 +130,30 @@ const userGoalFeedGet = async (
   res: Response,
   next: NextFunction
 ) => {
-  if (req.user) {
-    const user = await User.findById(req.user.id);
-
-    if (user) {
-      const userIds = user.friends;
-      userIds.push(user.id);
-
-      Goal.find()
-        .where('creator')
-        .in(userIds)
-        .exec((err, goals) => {
-          if (err) {
-            return next(err);
-          }
-
-          if (goals) {
-            return res.json({ message: 'Users goal feed', goals });
-          }
-        });
-    } else {
-      return res.status(400).json({ message: 'Could not find user' });
-    }
+  if (!req.user) {
+    return res.status(401).json({ message: 'User is not logged in' });
   }
-  return res.status(401).json({ message: 'User is not logged in' });
+
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      throw new Error('could not find user');
+      // return res.json({ message: 'Could not find user' });
+    }
+
+    const userIds = user.friends;
+    userIds.push(user.id);
+
+    const goals = await Goal.find().where('creator').in(userIds);
+
+    if (goals.length === 0) {
+      return res.json({ message: 'No goals found' });
+    }
+
+    return res.json({ message: 'User goal feed retrieved', goals });
+  } catch (error: any) {
+    res.json({ message: error.message });
+  }
 };
 
 const updateGoalPrivacyPut = [

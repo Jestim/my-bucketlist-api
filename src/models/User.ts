@@ -1,10 +1,5 @@
 import { Schema, model, Types } from 'mongoose';
 
-export interface IFriendRequest {
-  userId: Types.ObjectId;
-  status: 'pending' | 'rejected';
-}
-
 export interface IUser {
   id: Types.ObjectId;
   username: string;
@@ -14,7 +9,6 @@ export interface IUser {
   lastName: string;
   age: number;
   friends: Types.ObjectId[];
-  friendRequests: IFriendRequest[];
 }
 
 const userSchema = new Schema<IUser>(
@@ -25,8 +19,7 @@ const userSchema = new Schema<IUser>(
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     age: { type: Number },
-    friends: { type: [Schema.Types.ObjectId], ref: 'User' },
-    friendRequests: { type: [Object] }
+    friends: { type: [Schema.Types.ObjectId], ref: 'User' }
   },
   { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } }
 );

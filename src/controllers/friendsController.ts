@@ -1,79 +1,69 @@
 import { NextFunction, Request, Response } from 'express';
 import { body, param } from 'express-validator';
 import isValidObjectId from '../helpers/isValidObjectId';
-import User, { IFriendRequest } from '../models/User';
+import FriendRequest from '../models/FriendRequest';
+import User from '../models/User';
 
 // GET FRIENDS
-const friendsListGet = (req: Request, res: Response, next: NextFunction) => {
-  if (req.user) {
-    User.findById(req.user.id)
-      .populate('friends', ['username', 'firstName', 'lastName', 'age'])
-      .exec((err, user) => {
-        if (err) {
-          return next(err);
-        }
-
-        if (!user) {
-          return res.status(400).json({ message: 'Could not find user' });
-        }
-        return res.json({
-          message: 'Successfully retrieved friend list',
-          friends: user.friends
-        });
-      });
-  } else {
+const friendsListGet = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (!req.user) {
     return res.status(401).json({ message: 'User is not logged in' });
+  }
+
+  try {
+    const user = await User.findById(req.user.id).populate('friends');
+
+    if (!user) {
+      return res.json({ message: 'User not found' });
+    }
+
+    if (user.friends.length === 0) {
+      return res.json({ message: 'No friends found' });
+    }
+
+    return res.json({
+      message: 'Successfully retrieved friend list',
+      friends: user.friends
+    });
+  } catch (error: any) {
+    res.json({ message: error.message });
   }
 };
 
 // SEND FRIEND REQUEST
-const sendFriendRequestPost = async (req: Request, res: Response) => {
+const sendFriendRequestPost = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   body('friendid').trim().escape();
 
   if (!isValidObjectId(req.body.friendid)) {
-    return res.status(400).json({ message: 'Could not find user' });
+    return res.status(400).json({ message: 'UserId is invalid' });
   }
 
-  if (req.user) {
-    try {
-      // Find current user and add the friendrequest
-      const user = await User.findById(req.user.id);
+  if (!req.user) {
+    return res.status(401).json({ message: 'User is not logged in' });
+  }
 
-      if (!user) {
-        res.status(401);
-        throw new Error('Could not find user');
-      }
+  // Create a new friendRequest with userId as requester and friendId as recipient
+  const newFriendRequest = new FriendRequest({
+    requester: req.user.id,
+    recipient: req.body.friendid,
+    status: 'pending'
+  });
 
-      // Find the friend and add the request to that user
-      const friend = await User.findById(req.body.friendid);
-
-      if (!friend) {
-        res.status(400);
-        throw new Error('Could not find user');
-      }
-
-      // Create a friend request with friends id
-      const friendRequestToUser: IFriendRequest = {
-        userId: req.body.friendid,
-        status: 'pending'
-      };
-      user.friendRequests.push(friendRequestToUser);
-      await user.save();
-
-      //   Create a friend request with user id
-      const friendRequestToFriend: IFriendRequest = {
-        userId: user.id,
-        status: 'pending'
-      };
-      friend.friendRequests.push(friendRequestToFriend);
-      await friend.save();
-
-      return res.json({ message: 'Friend request sent' });
-    } catch (error: any) {
-      return res.json({ message: error.message });
+  newFriendRequest.save((error) => {
+    if (error) {
+      return next(error);
     }
-  }
-  return res.status(401).json({ message: 'User is not logged in' });
+
+    res.json({ message: 'Friend request sent' });
+  });
 };
 
 // UPDATE FRIEND REQUEST STATUS

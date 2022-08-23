@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { body, param, validationResult } from 'express-validator';
 import isValidObjectId from '../helpers/isValidObjectId';
 import Goal from '../models/Goal';
-import User, { IFriendRequest } from '../models/User';
+import User from '../models/User';
 
 // GET ALL USERS
 const usersListGet = (req: Request, res: Response, next: NextFunction) => {
