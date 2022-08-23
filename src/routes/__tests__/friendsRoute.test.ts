@@ -47,13 +47,9 @@ describe('friends route', () => {
 
         user.save();
 
-        console.log(user);
-
         const res = await req
           .get('/api/friends')
           .set('Authorization', `Bearer ${jwtToken}`);
-
-        console.log(res.body);
 
         expect(res.status).toBe(200);
         expect(res.body.friends[0].id).toBe(allUsers[1].id);
@@ -63,16 +59,12 @@ describe('friends route', () => {
     });
 
     describe('/api/friends POST', () => {
-      it('should return status 200 & add the friend to the currentUsers friendRequests array with status pending and userid & add the currentUsers id to the friends frindRequests array with status pending & return the updated user', async () => {
+      it('should return status 200 & add a new friendrequest object to the database with status pending and currentuser as requester and friend as recipient', async () => {
         // Send request to add friend (user 1) to friendrequest
         const res = await req
           .post('/api/friends')
           .set('Authorization', `Bearer ${jwtToken}`)
           .send({ friendid: allUsers[1].id });
-
-        // Check status code 200
-        expect(res.status).toBe(200);
-        expect(res.body.message).toBe('Friend request sent');
 
         const currentUser = await User.findOne({ username: '0' });
         if (!currentUser) {
@@ -89,9 +81,16 @@ describe('friends route', () => {
           throw new Error('friendRequests is null');
         }
 
-        // Check that the friendrequest is added to the friendRequests collection with status pending
+        // Check status code 200
+        expect(res.status).toBe(200);
+        expect(res.body.message).toBe('Friend request sent');
 
-        // Check that the friends friendRequests array is updated with a pending request from current user
+        // Check that the friendrequest is added to the friendRequests collection with status pending
+        expect(friendRequests[0].status).toBe('pending');
+
+        // Check that requester is the id of the current user and the recipient is the id of the friend
+        expect(friendRequests[0].requester.toString()).toBe(currentUser.id);
+        expect(friendRequests[0].recipient.toString()).toBe(friend.id);
       });
     });
 
