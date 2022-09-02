@@ -146,8 +146,27 @@ describe('friends route', () => {
       });
 
       describe('if request is rejected', () => {
-        it('should return status 200 & update the friendRequest document status to rejected', async () => {
-          // TODO
+        it('should return status 200 & update the friendRequest status to rejected', async () => {
+          const friendRequest = new FriendRequest({
+            requester: allUsers[1].id,
+            recipient: payloadSub,
+            status: 'pending'
+          });
+
+          await friendRequest.save();
+
+          const res = await req
+            .put('/api/friends')
+            .set('Authorization', `Bearer ${jwtToken}`)
+            .send({ friendid: allUsers[1], accepted: 'false' });
+
+          const friendRequestAfter = await FriendRequest.findOne();
+          if (!friendRequestAfter) {
+            throw new Error('friendRequestAfter is null');
+          }
+
+          expect(res.status).toBe(200);
+          expect(friendRequestAfter.status).toBe('rejected');
         });
       });
     });

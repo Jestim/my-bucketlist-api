@@ -81,8 +81,9 @@ const acceptOrRejectFriendRequestPut = async (
   }
 
   // If accepted add user to both users friends array and remove request from friendRequests array
-  const accepted = Boolean(req.body.accepted);
-  if (accepted) {
+  const isAccepted = req.body.accepted === 'true';
+
+  if (isAccepted) {
     try {
       const currentUser = await User.findById(req.user.id);
       const friend = await User.findById(req.body.friendid);
