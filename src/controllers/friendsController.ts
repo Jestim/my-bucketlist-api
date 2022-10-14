@@ -88,6 +88,7 @@ const acceptOrRejectFriendRequestPut = async (
       const currentUser = await User.findById(req.user.id);
       const friend = await User.findById(req.body.friendid);
       if (!currentUser || !friend) {
+        res.status(404);
         throw new Error('Could not find user');
       }
 
@@ -116,6 +117,7 @@ const acceptOrRejectFriendRequestPut = async (
     });
 
     if (!friendRequest) {
+      res.status(404);
       throw new Error('Could not find friendRequest');
     }
 
@@ -129,32 +131,33 @@ const acceptOrRejectFriendRequestPut = async (
 };
 
 // REMOVE FRIEND
-const removeFriendDelete = (
+const removeFriendDelete = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  param('friendid').trim().escape();
+  body('friendid').trim().escape();
 
-  if (req.user) {
-    User.findByIdAndUpdate(
-      req.user.id,
-      {
-        $pull: { friends: req.params.userid }
-      },
-      { returnDocument: 'after' }
-    ).exec((err, user) => {
-      if (err) {
-        return next(err);
-      }
-
-      if (!user) {
-        return res.json({ message: 'Could not find user' });
-      }
-      return res.json({ message: 'Friend removed from friends list', user });
-    });
-  } else {
+  if (!req.user) {
     return res.status(401).json({ message: 'User is not logged in' });
+  }
+
+  try {
+    // Remove friend from currentUsers friends array
+    await User.findByIdAndUpdate(req.user.id, {
+      $pull: { friends: req.body.friendid }
+    });
+
+    // Remove currentUser from friends friends array
+    await User.findByIdAndUpdate(req.body.friendid, {
+      $pull: { friends: new mongoose.Types.ObjectId(req.user.id) }
+    });
+
+    return res.json({ message: 'Friend deleted' });
+  } catch (error: any) {
+    console.log(error);
+
+    return res.json({ message: error.message });
   }
 };
 

@@ -6,10 +6,13 @@ export interface IFriendRequest {
   status: 'pending' | 'rejected';
 }
 
-const friendRequestSchema = new Schema<IFriendRequest>({
-  requester: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  recipient: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  status: { type: String, required: true }
-});
+const friendRequestSchema = new Schema<IFriendRequest>(
+  {
+    requester: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    recipient: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    status: { type: String, required: true }
+  },
+  { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } }
+);
 
 export default model<IFriendRequest>('FriendRequest', friendRequestSchema);

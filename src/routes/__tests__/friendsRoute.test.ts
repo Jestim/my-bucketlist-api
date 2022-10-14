@@ -115,7 +115,7 @@ describe('friends route', () => {
           const res = await req
             .put('/api/friends')
             .set('Authorization', `Bearer ${jwtToken}`)
-            .send({ friendid: allUsers[1], accepted: 'true' });
+            .send({ friendid: allUsers[1].id, accepted: 'true' });
 
           const currentUser = await User.findById(payloadSub);
           if (!currentUser) {
@@ -158,7 +158,7 @@ describe('friends route', () => {
           const res = await req
             .put('/api/friends')
             .set('Authorization', `Bearer ${jwtToken}`)
-            .send({ friendid: allUsers[1], accepted: 'false' });
+            .send({ friendid: allUsers[1].id, accepted: 'false' });
 
           const friendRequestAfter = await FriendRequest.findOne();
           if (!friendRequestAfter) {
@@ -167,13 +167,38 @@ describe('friends route', () => {
 
           expect(res.status).toBe(200);
           expect(friendRequestAfter.status).toBe('rejected');
+
+          // Remove friendRequest
+          await FriendRequest.findByIdAndDelete(friendRequestAfter.id);
         });
       });
     });
 
-    describe('/api/friends/:userid DELETE', () => {
-      it('should return status 200 and delete the specified friend and return the updated user', async () => {
-        // TODO
+    describe('/api/friends/ DELETE', () => {
+      it('should return status 200 & delete the userIds in the friends array on both currentUser and friend', async () => {
+        await User.findByIdAndUpdate(payloadSub, {
+          $push: { friends: allUsers[1].id }
+        });
+        await User.findByIdAndUpdate(allUsers[1].id, {
+          $push: { friends: payloadSub }
+        });
+
+        const currentUser = await User.findById(payloadSub);
+        const friend = await User.findById(allUsers[1].id);
+
+        const res = await req
+          .delete('/api/friends')
+          .set('Authorization', `Bearer ${jwtToken}`)
+          .send({ friendid: allUsers[1].id });
+
+        const currentUserAfter = await User.findById(payloadSub);
+        const friendAfter = await User.findById(allUsers[1].id);
+
+        expect(currentUser?.friends[0].toString()).toBe(allUsers[1].id);
+        expect(friend?.friends[0].toString()).toBe(payloadSub);
+
+        expect(currentUserAfter?.friends.length).toBe(0);
+        expect(friendAfter?.friends.length).toBe(0);
       });
     });
 

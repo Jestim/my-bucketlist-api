@@ -13,6 +13,6 @@ router.post('/', friendsController.sendFriendRequestPost);
 router.put('/', friendsController.acceptOrRejectFriendRequestPut);
 
 // REMOVE FRIEND
-router.delete('/:userid', friendsController.removeFriendDelete);
+router.delete('/', friendsController.removeFriendDelete);
 
 export default router;
