@@ -51,6 +51,18 @@ const sendFriendRequestPost = async (
     return res.status(401).json({ message: 'User is not logged in' });
   }
 
+  const friendRequests = await FriendRequest.find({});
+
+  // Return 400 if request already has been sent
+  for (let i = 0; i < friendRequests.length; i++) {
+    if (
+      friendRequests[i].requester.toString() === req.body.friendid ||
+      friendRequests[i].recipient.toString() === req.body.friendid
+    ) {
+      return res.status(400).json({ message: 'Friendrequest already sent' });
+    }
+  }
+
   // Create a new friendRequest with userId as requester and friendId as recipient
   const newFriendRequest = new FriendRequest({
     requester: req.user.id,

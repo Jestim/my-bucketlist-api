@@ -99,6 +99,32 @@ describe('friends route', () => {
         // Remove friendRequest
         await FriendRequest.findByIdAndDelete(friendRequests[0].id);
       });
+
+      it('should return status 400 if request already exists', async () => {
+        const res = await req
+          .post('/api/friends')
+          .set('Authorization', `Bearer ${jwtToken}`)
+          .send({ friendid: allUsers[1].id });
+
+        console.log(res.status);
+
+        const res2 = await req
+          .post('/api/friends')
+          .set('Authorization', `Bearer ${jwtToken}`)
+          .send({ friendid: allUsers[1].id });
+
+        console.log(res2.status);
+
+        const friendRequests = await FriendRequest.find();
+        if (!friendRequests) {
+          throw new Error('friendRequests is null');
+        }
+
+        console.log(friendRequests);
+
+        // Remove friendRequest
+        await FriendRequest.findByIdAndDelete(friendRequests[0].id);
+      });
     });
 
     describe('/api/friends/ PUT', () => {

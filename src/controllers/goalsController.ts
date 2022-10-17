@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
 import { body, param, validationResult } from 'express-validator';
-import mongoose from 'mongoose';
 import Goal from '../models/Goal';
 import User from '../models/User';
 
