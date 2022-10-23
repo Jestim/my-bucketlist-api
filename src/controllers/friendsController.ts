@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
-import { body, param } from 'express-validator';
+import { body } from 'express-validator';
 import mongoose from 'mongoose';
 import isValidObjectId from '../helpers/isValidObjectId';
-import FriendRequest from '../models/FriendRequest';
+import FriendRequest, { IFriendRequest } from '../models/FriendRequest';
 import User from '../models/User';
 
 // GET FRIENDS
@@ -29,6 +29,42 @@ const friendsListGet = async (
     return res.json({
       message: 'Successfully retrieved friend list',
       friends: user.friends
+    });
+  } catch (error: any) {
+    return res.json({ message: error.message });
+  }
+};
+
+// GET FRIENDREQUESTS
+const friendRequestsGet = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (!req.user) {
+    return res.status(401).json({ message: 'User is not logged in' });
+  }
+
+  try {
+    const friendRequests = await FriendRequest.find({});
+
+    if (friendRequests.length === 0) {
+      return res.json({ message: 'There are no friend requests' });
+    }
+
+    const userRequests: IFriendRequest[] = [];
+    for (let i = 0; i < friendRequests.length; i++) {
+      if (
+        friendRequests[i].requester.toString() === req.user.id.toString() ||
+        friendRequests[i].recipient.toString() === req.user.id.toString()
+      ) {
+        userRequests.push(friendRequests[i]);
+      }
+    }
+
+    return res.json({
+      message: 'Successfully retrieved friend request list',
+      friendRequests: userRequests
     });
   } catch (error: any) {
     return res.json({ message: error.message });
@@ -175,6 +211,7 @@ const removeFriendDelete = async (
 
 export default {
   friendsListGet,
+  friendRequestsGet,
   sendFriendRequestPost,
   acceptOrRejectFriendRequestPut,
   removeFriendDelete

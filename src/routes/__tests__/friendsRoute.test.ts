@@ -62,6 +62,40 @@ describe('friends route', () => {
       });
     });
 
+    describe('/api/friends/friend-requests GET', () => {
+      it('should return status 200 and a list of the current users friendrequests', async () => {
+        const friendRequest0 = new FriendRequest({
+          requester: allUsers[1].id,
+          recipient: payloadSub,
+          status: 'pending'
+        });
+        await friendRequest0.save();
+
+        const friendRequest1 = new FriendRequest({
+          requester: payloadSub,
+          recipient: allUsers[2].id,
+          status: 'pending'
+        });
+        await friendRequest1.save();
+
+        const friendRequest2 = new FriendRequest({
+          requester: allUsers[3].id,
+          recipient: allUsers[2].id,
+          status: 'pending'
+        });
+        await friendRequest2.save();
+
+        const res = await req
+          .get('/api/friends/friend-requests')
+          .set('Authorization', `Bearer ${jwtToken}`);
+
+        expect(res.status).toBe(200);
+        expect(res.body.friendRequests.length).toBe(2);
+
+        await FriendRequest.deleteMany({});
+      });
+    });
+
     describe('/api/friends POST', () => {
       it('should return status 200 & add a new friendrequest object to the database with status pending and currentuser as requester and friend as recipient', async () => {
         // Send request to add friend (user 1) to friendrequest
@@ -106,21 +140,15 @@ describe('friends route', () => {
           .set('Authorization', `Bearer ${jwtToken}`)
           .send({ friendid: allUsers[1].id });
 
-        console.log(res.status);
-
         const res2 = await req
           .post('/api/friends')
           .set('Authorization', `Bearer ${jwtToken}`)
           .send({ friendid: allUsers[1].id });
 
-        console.log(res2.status);
-
         const friendRequests = await FriendRequest.find();
         if (!friendRequests) {
           throw new Error('friendRequests is null');
         }
-
-        console.log(friendRequests);
 
         // Remove friendRequest
         await FriendRequest.findByIdAndDelete(friendRequests[0].id);

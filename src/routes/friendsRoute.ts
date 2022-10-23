@@ -6,6 +6,9 @@ const router = Router();
 // GET FRIENDS
 router.get('/', friendsController.friendsListGet);
 
+// GET FRIENDREQUESTS
+router.get('/friend-requests', friendsController.friendRequestsGet);
+
 // SEND FRIEND REQUEST
 router.post('/', friendsController.sendFriendRequestPost);
 
